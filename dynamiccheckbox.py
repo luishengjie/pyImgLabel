@@ -16,9 +16,11 @@ class DynamicCheckBox(QWidget):
         length = len(self.labelslist)
         split_val = int(length / 2)
         for i, label in enumerate(self.labelslist):
-            c = QCheckBox(str(label))
-            c.setStyleSheet(" QCheckBox { text-align: left top; padding: 5 px;}")
+            c = QCheckBox("{}. {}".format(i+1, label))
+            # c = QCheckBox(str(label))
+            c.setStyleSheet("QCheckBox {text-align: left top; padding: 5 px;}")
             c.setContentsMargins(0, 0, 0, 0)
+
             # c.setChecked(True)
             if i > split_val:
                 i = i - split_val - 1
@@ -30,7 +32,7 @@ class DynamicCheckBox(QWidget):
             self.check_dict[label] = c
         layout.setSpacing(0)
         self.setLayout(layout)
-        self.setContentsMargins(0,0,0,0)
+        self.setContentsMargins(0, 0, 0, 0)
 
         self.label_data = ld.LabelData(ANNOTATE_DATA_PATH, self.labelslist)
 
@@ -70,5 +72,10 @@ class DynamicCheckBox(QWidget):
             self.label_data.dataframe.ix[self.label_data.dataframe['image'] == image_id, header] = value
             # print(self.label_data.dataframe.ix[self.label_data.dataframe['image'] == image_id, header])
 
+        self.label_data.dataframe.to_csv(ANNOTATE_DATA_PATH, index=False)
+
+    def delete_row(self, key):
+        print(key)
+        self.label_data.dataframe = self.label_data.dataframe[self.label_data.dataframe.image != key]
         self.label_data.dataframe.to_csv(ANNOTATE_DATA_PATH, index=False)
         

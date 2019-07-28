@@ -1,9 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtGui import QPixmap, QImage, QIcon
+from PyQt5.QtWidgets import QMessageBox
 import cv2
 import imutils
 import os
 from constants import *
+import shutil
 
 
 class ImageObj():
@@ -28,9 +30,6 @@ class MainApp(QtWidgets.QMainWindow):
         QtWidgets.QWidget.__init__(self)
         self.ui = uic.loadUi('main.ui', self)
         self.dynamic_checkbox = self.ui.sideCheckBox
-        # placeholder = cv2.imread("images/grey.jpg")
-        # self.update_main_screen(placeholder)
-        # self.init_main_screen(imagepath='data/sample_images')
         self.image_count = -1
         self.image_path = IMAGE_PATH
         if os.path.isdir(self.image_path):
@@ -42,22 +41,23 @@ class MainApp(QtWidgets.QMainWindow):
 
         self.update_main_screen()
         height, width = self.curr_image.get_shape()
-        self.dynamic_checkbox.initialize(self.curr_image.get_name(), width, height)
-
+        self.dynamic_checkbox.initialize(self.curr_image.get_name(),
+                                         width, height)
 
     def keyPressEvent(self, event):
         # print(event.key())
         if event.key() == KEY_RIGHT:
             self.dynamic_checkbox.update_data(self.curr_image.get_name())
             self.image_count += 1
+            if self.image_count < 0:
+                self.image_count = 0
             if self.image_count > len(self.images_list) - 1:
                 self.image_count = self.images_list - 1
             # UPDATE VALUES TO CSV
             self.update_main_screen()
             height, width = self.curr_image.get_shape()
             self.dynamic_checkbox.initialize(self.curr_image.get_name(), width, height)
-            
-            
+
         elif event.key() == KEY_LEFT:
             self.dynamic_checkbox.update_data(self.curr_image.get_name())
             self.image_count -= 1
@@ -66,43 +66,65 @@ class MainApp(QtWidgets.QMainWindow):
             self.update_main_screen()
             height, width = self.curr_image.get_shape()
             self.dynamic_checkbox.initialize(self.curr_image.get_name(), width, height)
-            
 
+        elif event.key() == ESC_KEY:
+            self.delete_image()
 
         elif event.key() == ONE:
             self.dynamic_checkbox.update_checkbox(0)
-            
+
         elif event.key() == TWO:
             self.dynamic_checkbox.update_checkbox(1)
-        
+
         elif event.key() == THREE:
             self.dynamic_checkbox.update_checkbox(2)
-        
+
         elif event.key() == FOUR:
             self.dynamic_checkbox.update_checkbox(3)
-        
+
         elif event.key() == FIVE:
             self.dynamic_checkbox.update_checkbox(4)
-        
+
         elif event.key() == SIX:
             self.dynamic_checkbox.update_checkbox(5)
-        
+
         elif event.key() == SEVEN:
             self.dynamic_checkbox.update_checkbox(6)
-        
+
         elif event.key() == EIGHT:
             self.dynamic_checkbox.update_checkbox(7)
-        
+
         elif event.key() == NINE:
             self.dynamic_checkbox.update_checkbox(8)
-        
+
         event.accept()
         # self.update_main_screen()
 
+    def delete_image(self):
+        buttonReply = QMessageBox.question(self, 'Delete Image',
+                                           "Are you sure you want to delete this image?",
+                                           QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+
+        if buttonReply == QMessageBox.Yes:
+            print('Remove Image', self.images_list[self.image_count])
+            src = os.path.join(IMAGE_PATH, self.images_list[self.image_count])
+            if not os.path.exists(TRASH_PATH):
+                os.makedirs(TRASH_PATH)
+            dst = TRASH_PATH
+            shutil.move(src, dst)
+            self.dynamic_checkbox.delete_row(self.images_list[self.image_count])
+            del self.images_list[self.image_count]
+            self.image_count -= 1
+            self.update_main_screen()
+            # Update csv file
+            
+
+
+
     def update_main_screen(self):
 
-        if self.image_count == -1:
-            image = cv2.imread(DEFAULT_IMAGE)
+        if self.image_count <= -1:
+            self.curr_image = ImageObj(DEFAULT_IMAGE)
         else:
             image_name = self.images_list[self.image_count]
             image_name = os.path.join(self.image_path, image_name)
@@ -110,7 +132,7 @@ class MainApp(QtWidgets.QMainWindow):
 
         self.set_main_screen_image(self.curr_image.get_image())
         self.update_image_text_labels()
-        
+
     def set_main_screen_image(self, image):
         assert(image is not None, "None Type received")
         width = self.ui.mainScreenLabel.frameGeometry().width()
@@ -127,9 +149,9 @@ class MainApp(QtWidgets.QMainWindow):
     def update_image_text_labels(self):
         self.ui.progressTextLabel.setText(str(self.image_count + 1) + ' / ' +
                                           str(len(self.images_list)))
-        
+
         self.ui.displayImageNameLabel.setText(self.curr_image.get_name())
         height, width = self.curr_image.get_shape()
         self.ui.displayImageWidthLabel.setText(str(width))
         self.ui.displayImageHeightLabel.setText(str(height))
-        
+

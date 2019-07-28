@@ -1,9 +1,14 @@
 import os
 
-ANNOTATE_DATA_PATH = 'beach.csv'
+ANNOTATE_DATA_PATH = 'test.csv'
 LABELS_PATH = 'labels.txt'
-IMAGE_PATH = '/Users/luishengjie/Documents/Y4S1/CG4001/places356_multi_label/beach'
+# IMAGE_PATH = '/Users/luishengjie/Documents/Y4S1/CG4001/places356_multi_label/desert-sand'
+IMAGE_PATH = 'data/sample_images'
+TRASH_PATH = 'data/trash'
 DEFAULT_IMAGE = "images/grey.jpg"
+
+ESC_KEY = 16777216
+DEL_KEY =  16777219
 
 KEY_UP = 16777235
 KEY_LEFT = 16777234
