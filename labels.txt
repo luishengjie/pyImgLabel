@@ -1,0 +1,7 @@
+mountain
+rock
+sand
+sky
+tree
+vegetation
+water
